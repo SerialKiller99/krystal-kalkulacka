@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KRYSTAL LUNARIS - Zaokrouhlená kalkulačka Yangů</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+            background-color: #1a1a1a;
+            border: 1px solid #2d2d2d;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        h1 {
+            color: #ffc107;
+            font-size: 20px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            text-align: center;
+            border-bottom: 2px solid #ffc107;
+            padding-bottom: 10px;
+        }
+        .config-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            background-color: #222;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 25px;
+            border: 1px solid #333;
+        }
+        .config-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        label {
+            font-size: 12px;
+            color: #ffc107;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #2d2d2d;
+            vertical-align: middle;
+        }
+        th {
+            background-color: #242424;
+            color: #ffc107;
+            font-weight: 600;
+        }
+        input {
+            background-color: #2b2b2b;
+            color: #fff;
+            border: 1px solid #444;
+            padding: 8px 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        select {
+            background-color: #2b2b2b;
+            color: #fff;
+            border: 1px solid #444;
+            padding: 8px 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #ffc107;
+        }
+        .highlight {
+            color: #4caf50;
+            font-weight: bold;
+        }
+        .total-box {
+            margin-top: 25px;
+            background-color: #222;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #4caf50;
+            text-align: right;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>KRYSTAL LUNARIS (Kalkulačka vylepšování)</h1>
+    
+    <!-- Nastavení úrovní -->
+    <div class="config-grid">
+        <div class="config-group">
+            <label for="lvl-start">Počáteční úroveň</label>
+            <select id="lvl-start" onchange="validateAndCalc()">
+                <option value="0" selected>+0</option>
+                <option value="1">+1</option>
+                <option value="2">+2</option>
+                <option value="3">+3</option>
+                <option value="4">+4</option>
+                <option value="5">+5</option>
+                <option value="6">+6</option>
+                <option value="7">+7</option>
+                <option value="8">+8</option>
+            </select>
+        </div>
+
+        <div class="config-group">
+            <label for="lvl-end">Cílová úroveň</label>
+            <select id="lvl-end" onchange="validateAndCalc()">
+                <option value="1">+1</option>
+                <option value="2">+2</option>
+                <option value="3">+3</option>
+                <option value="4">+4</option>
+                <option value="5">+5</option>
+                <option value="6" selected>+6</option>
+                <option value="7">+7</option>
+                <option value="8">+8</option>
+                <option value="9">+9</option>
+            </select>
+        </div>
+    </div>
+    
+    <!-- Tabulka položek -->
+    <table>
+        <thead>
+            <tr>
+                <th>Položka</th>
+                <th>Nutné množství</th>
+                <th>Cena za 1 ks (v Yangách)</th>
+                <th>Celková cena</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Krystal -->
+            <tr>
+                <td><strong>Krystal (+0)</strong></td>
+                <td><span id="stat-krystal">1</span> ks</td>
+                <td><input type="text" id="price-krystal" value="1000000000" oninput="sumAll()"></td>
+                <td><span id="total-krystal" class="highlight">0</span> Yang</td>
+            </tr>
+
+            <!-- Krystalický prach -->
+            <tr>
+                <td><strong>Krystalický prach</strong></td>
+                <td><span id="stat-prach">0</span> ks</td>
+                <td><input type="text" id="price-prach" value="1300000000" oninput="sumAll()"></td>
+                <td><span id="total-prach" class="highlight">0</span> Yang</td>
+            </tr>
+
+            <!-- Stabilizátor -->
+            <tr>
+                <td><strong>Stabilizátor (od +7 výše)</strong></td>
+                <td><span id="stat-stabilizator">0</span> ks</td>
+                <td><input type="text" id="price-stabilizator" value="1500000000" oninput="sumAll()"></td>
+                <td><span id="total-stabilizator" class="highlight">0</span> Yang</td>
+            </tr>
+
+            <!-- Poplatek kováři -->
+            <tr>
+                <td><strong>Poplatek kováři</strong></td>
+                <td><span>Z Wiki</span></td>
+                <td><input type="text" id="price-poplatok" value="Počítáno automaticky" disabled style="color: #888;"></td>
+                <td><span id="total-poplatok" class="highlight">0</span> Yang</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Celková hodnota -->
+    <div class="total-box">
+        <strong>Odhadovaná hodnota výroby:</strong> <span id="final-sum" class="highlight">0</span> Yang
+    </div>
+</div>
+
+<script>
+    const wikiData = [
+        { successRate: 0.40, fee: 500000000,    dust: 1,   stabilizer: 0 }, 
+        { successRate: 0.50, fee: 400000000,    dust: 2,   stabilizer: 0 }, 
+        { successRate: 0.60, fee: 800000000,    dust: 4,   stabilizer: 0 }, 
+        { successRate: 0.70, fee: 1200000000,   dust: 8,   stabilizer: 0 }, 
+        { successRate: 0.80, fee: 1600000000,   dust: 16,  stabilizer: 0 }, 
+        { successRate: 0.90, fee: 2000000000,   dust: 32,  stabilizer: 0 }, 
+        { successRate: 0.95, fee: 40000000000,  dust: 64,  stabilizer: 2 }, 
+        { successRate: 1.00, fee: 80000000000,  dust: 128, stabilizer: 4 }, 
+        { successRate: 1.00, fee: 160000000000, dust: 256, stabilizer: 8 }  
+    ];
+
+    let currentGoldFeeYang = 0;
+
+    window.onload = function() {
+        validateAndCalc();
+    };
+
+    function validateAndCalc() {
+        const start = parseInt(document.getElementById('lvl-start').value);
+        let end = parseInt(document.getElementById('lvl-end').value);
+        
+        if (start >= end) {
+            end = (start + 1 <= 9) ? start + 1 : 9;
+            document.getElementById('lvl-end').value = end;
+        }
+
+        let totalDust = 0;
+        let totalStabilizers = 0;
+        currentGoldFeeYang = 0;
+
+        for (let i = start; i < end; i++) {
+            let data = wikiData[i];
+            let avgAttempts = (i < 4) ? 1.0 : (1.0 / data.successRate);
+
+            totalDust += data.dust * avgAttempts;
+            totalStabilizers += data.stabilizer * avgAttempts;
+            currentGoldFeeYang += data.fee * avgAttempts;
+        }
+
+        // Použití Math.round() splňuje pravidlo: >= 0.5 nahoru, <= 0.4 dolů
+        document.getElementById('stat-prach').innerText = Math.round(totalDust);
+        document.getElementById('stat-stabilizator').innerText = Math.round(totalStabilizers);
+
+        sumAll();
+    }
+
+    function parseToNumber(id) {
+        let val = document.getElementById(id).value.replace(/\s/g, '').replace(',', '.');
+        let num = parseFloat(val);
+        return isNaN(num) ? 0 : num;
+    }
+
+    function formatWithDots(value) {
+        return value.toLocaleString('cs-CZ', {maximumFractionDigits: 0}).replace(/\s/g, '.');
+    }
+
+    function sumAll() {
+        let pKrystal = parseToNumber('price-krystal');
+        let pPrach = parseToNumber('price-prach');
+        let pStabilizator = parseToNumber('price-stabilizator');
+
+        let qPrach = parseFloat(document.getElementById('stat-prach').innerText) || 0;
+        let qStabilizator = parseFloat(document.getElementById('stat-stabilizator').innerText) || 0;
+
+        let cKrystal = 1.0 * pKrystal;
+        let cPrach = qPrach * pPrach;
+        let cStabilizator = qStabilizator * pStabilizator;
+
+        let totalSumYang = cKrystal + cPrach + cStabilizator + currentGoldFeeYang;
+
+        document.getElementById('total-krystal').innerText = formatWithDots(cKrystal);
+        document.getElementById('total-prach').innerText = formatWithDots(cPrach);
+        document.getElementById('total-stabilizator').innerText = formatWithDots(cStabilizator);
+        document.getElementById('total-poplatok').innerText = formatWithDots(currentGoldFeeYang);
+
+        document.getElementById('final-sum').innerText = formatWithDots(totalSumYang);
+    }
+</script>
+
+</body>
+</html>
